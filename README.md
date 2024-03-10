@@ -12,7 +12,7 @@ Brief description or overview of what the project does.
 
 1. Clone the repository
 ```bash
-$ git clone <repository-url>
+$ git clone https://github.com/kdelpe/company.git
 $ cd project-folder
 $ go build # or any other package manager command
 ```
