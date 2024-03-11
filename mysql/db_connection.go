@@ -17,11 +17,12 @@ func Connection() {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
 	cfg := mysql.Config{
-		User:   os.Getenv("DB_USERNAME"),
-		Passwd: os.Getenv("DB_PASSWORD"),
-		Net:    "tcp",
-		Addr:   "127.0.0.1:3306",
-		DBName: "company",
+		User:      os.Getenv("DB_USERNAME"),
+		Passwd:    os.Getenv("DB_PASSWORD"),
+		Net:       "tcp",
+		Addr:      "127.0.0.1:3306",
+		DBName:    "company",
+		ParseTime: true,
 	}
 
 	db, err = sql.Open("mysql", cfg.FormatDSN())
@@ -35,4 +36,8 @@ func Connection() {
 	}
 
 	fmt.Println("Successful connected to MySQL DB! 🚀🚀")
+}
+
+func RetrieveDatabase() *sql.DB {
+	return db
 }
