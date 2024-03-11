@@ -14,8 +14,11 @@ func main() {
 
 	router.GET("/branches", server.GETBranches)
 	router.GET("/branches/:id", server.GETBranch)
+
 	router.GET("/employees", server.GETEmployees)
 	router.GET("/employees/:id", server.GETEmployee)
+
+	router.GET("/branchsuppliers", server.GETBranchSuppliers)
 
 	//Start server
 	err := router.Run("localhost:9090")

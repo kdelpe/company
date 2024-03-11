@@ -16,16 +16,16 @@ type Employee struct {
 }
 
 type Branch struct {
-	BranchID     int8      `json:"branch_id"`
-	BranchName   string    `json:"branch_name"`
-	MgrID        int64     `json:"mgr_id"`
-	MgrStartDate time.Time `json:"mgr_start_date"`
+	BranchID     int8       `json:"branch_id"`
+	BranchName   string     `json:"branch_name"`
+	MgrID        *int64     `json:"mgr_id"`
+	MgrStartDate *time.Time `json:"mgr_start_date"`
 }
 
 type BranchSupplier struct {
-	Branch       Branch `json:"branch"`
-	SupplierName string `json:"supplier_name"`
-	SupplyType   string `json:"supply_type"`
+	Branch       Branch  `json:"branch"`
+	SupplierName *string `json:"supplier_name"`
+	SupplyType   *string `json:"supply_type"`
 }
 
 type Client struct {

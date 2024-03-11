@@ -20,7 +20,7 @@ func GETBranches(c *gin.Context) {
 	for rows.Next() {
 		var branch Branch
 		if err := rows.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate); err != nil {
-			log.Println("Error retrieving branches")
+			log.Println("Error retrieving branches", err)
 			return
 		}
 		branches = append(branches, branch)
@@ -37,7 +37,7 @@ func GETBranch(c *gin.Context) {
 
 	var branch Branch
 	if err := row.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate); err != nil {
-		log.Println("Error retrieving branch")
+		log.Println("Error retrieving branch", err)
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
 		return
 	}

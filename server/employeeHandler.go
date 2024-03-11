@@ -12,28 +12,27 @@ func GETEmployees(c *gin.Context) {
 	db := mysql.RetrieveDatabase()
 
 	query := `
-	        SELECT 
-            e.emp_id, 
-            e.first_name, 
-            e.last_name, 
-            e.birth_date, 
-            e.sex, 
-            e.salary, 
-            e.super_id, 
-            b.branch_id, 
-            b.branch_name, 
-            b.mgr_id, 
-            b.mgr_start_date 
+	    SELECT 
+            employee.emp_id, 
+            employee.first_name, 
+            employee.last_name, 
+            employee.birth_date, 
+            employee.sex, 
+            employee.salary, 
+            employee.super_id, 
+            branch.branch_id, 
+            branch.branch_name, 
+            branch.mgr_id, 
+            branch.mgr_start_date 
         FROM 
-            Employee e
+            employee employee
         LEFT JOIN 
-            Branch b ON e.branch_id = b.branch_id
+            branch branch ON employee.branch_id = branch.branch_id
         LEFT JOIN 
-            Employee mgr ON b.mgr_id = mgr.emp_id
+            employee mgr ON branch.mgr_id = mgr.emp_id
         LEFT JOIN 
-            Employee super ON e.super_id = super.emp_id;
+            employee super ON employee.super_id = super.emp_id;
 `
-
 	rows, err := db.Query(query)
 	if err != nil {
 		log.Println("Error querying employees: ", err)
