@@ -29,13 +29,13 @@ type BranchSupplier struct {
 }
 
 type Client struct {
-	ClientID   int64  `json:"client_id"`
-	ClientName string `json:"client_name"`
-	Branch     Branch `json:"branch"`
+	ClientID   *int64  `json:"client_id"`
+	ClientName *string `json:"client_name"`
+	Branch     Branch  `json:"branch"`
 }
 
 type WorksWith struct {
-	EmpID      Employee
-	ClientID   Client
-	TotalSales int64 `json:"total_sales"`
+	EmpID      *int64 `json:"emp_id"`
+	ClientID   *int64 `json:"client_id"`
+	TotalSales *int64 `json:"total_sales"`
 }

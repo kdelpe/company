@@ -1,54 +1,33 @@
-package server
+package Employees
 
 import (
 	"errors"
-	"example/company/mysql"
+	"example/company/database"
+	"example/company/server"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 )
 
 func GETEmployees(c *gin.Context) {
-	db := mysql.RetrieveDatabase()
+	db := database.RetrieveDatabase()
 
-	query := `
-	    SELECT 
-            employee.emp_id, 
-            employee.first_name, 
-            employee.last_name, 
-            employee.birth_date, 
-            employee.sex, 
-            employee.salary, 
-            employee.super_id, 
-            branch.branch_id, 
-            branch.branch_name, 
-            branch.mgr_id, 
-            branch.mgr_start_date 
-        FROM 
-            employee employee
-        LEFT JOIN 
-            branch branch ON employee.branch_id = branch.branch_id
-        LEFT JOIN 
-            employee mgr ON branch.mgr_id = mgr.emp_id
-        LEFT JOIN 
-            employee super ON employee.super_id = super.emp_id;
-`
-	rows, err := db.Query(query)
+	rows, err := db.Query(database.GetAllEmployeesQuery)
 	if err != nil {
 		log.Println("Error querying employees: ", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not query database"})
 		return
 	}
 
-	var employees []Employee
+	var employees []server.Employee
 	for rows.Next() {
-		var employee Employee
-		var branch Branch
+		var employee server.Employee
+		var branch server.Branch
 		if err := rows.Scan(&employee.EmpID, &employee.FirstName, &employee.LastName, &employee.BirthDate, &employee.Sex,
 			&employee.Salary, &employee.SuperID, &branch.BranchID, &branch.BranchName,
 			&branch.MgrID, &branch.MgrStartDate); err != nil {
 			log.Println("Error retrieving employees", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not query database"})
 			return
 		}
 
@@ -60,13 +39,13 @@ func GETEmployees(c *gin.Context) {
 }
 
 func GETEmployee(c *gin.Context) {
-	db := mysql.RetrieveDatabase()
+	db := database.RetrieveDatabase()
 
 	empID := c.Param("id")
 
-	row := db.QueryRow("SELECT * FROM employee WHERE emp_id = ?", empID)
+	row := db.QueryRow(database.GetEmployeeByIDQuery, empID)
 
-	var employee Employee
+	var employee server.Employee
 	if err := row.Scan(&employee.EmpID, &employee.FirstName, &employee.LastName, &employee.BirthDate, &employee.Sex, &employee.Salary, &employee.SuperID, &employee.Branch.BranchID); err != nil {
 		log.Println("No Employee Found", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
@@ -76,7 +55,7 @@ func GETEmployee(c *gin.Context) {
 }
 
 //	func POSTEmployee(c *gin.Context) {
-//		db := mysql.RetrieveDatabase()
+//		db := database.RetrieveDatabase()
 //
 //		var employee Employee
 //		if err := c.ShouldBindJSON(&employee); err != nil {
@@ -100,7 +79,7 @@ func GETEmployee(c *gin.Context) {
 //		employee.EmpID = empID
 //		c.IndentedJSON(http.StatusCreated, employee)
 //	}
-func validateEmployeeData(employee Employee) error {
+func validateEmployeeData(employee server.Employee) error {
 	if employee.FirstName == "" {
 		return errors.New("first name is required")
 	}
