@@ -1,8 +1,8 @@
-package BranchSuppliers
+package branch_suppliers
 
 import (
 	"example/company/database"
-	"example/company/server"
+	"example/company/server/branch"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -19,10 +19,10 @@ func GETBranchSuppliers(c *gin.Context) {
 		return
 	}
 
-	var branchSuppliers []server.BranchSupplier
+	var branchSuppliers []BranchSuppliers
 	for rows.Next() {
-		var branchSupplier server.BranchSupplier
-		var branch server.Branch
+		var branchSupplier BranchSuppliers
+		var branch branch.Branch
 		if err := rows.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate,
 			&branchSupplier.SupplierName, &branchSupplier.SupplyType); err != nil {
 			log.Println("Error retrieving branch suppliers", err)
@@ -47,8 +47,8 @@ func GETBranchSupplier(c *gin.Context) {
 
 	row := db.QueryRow(database.GetBranchSupplierByIDQuery, branchSupplierID)
 
-	var branchSupplier server.BranchSupplier
-	var branch server.Branch
+	var branchSupplier BranchSuppliers
+	var branch branch.Branch
 	if err := row.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate,
 		&branchSupplier.SupplierName, &branchSupplier.SupplyType); err != nil {
 		log.Println("Error retrieving branch supplier", err)

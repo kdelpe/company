@@ -1,9 +1,9 @@
-package Employees
+package employee
 
 import (
 	"errors"
 	"example/company/database"
-	"example/company/server"
+	"example/company/server/branch"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -14,19 +14,19 @@ func GETEmployees(c *gin.Context) {
 
 	rows, err := db.Query(database.GetAllEmployeesQuery)
 	if err != nil {
-		log.Println("Error querying employees: ", err)
+		log.Println("Error querying employee: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not query database"})
 		return
 	}
 
-	var employees []server.Employee
+	var employees []Employee
 	for rows.Next() {
-		var employee server.Employee
-		var branch server.Branch
+		var employee Employee
+		var branch branch.Branch
 		if err := rows.Scan(&employee.EmpID, &employee.FirstName, &employee.LastName, &employee.BirthDate, &employee.Sex,
 			&employee.Salary, &employee.SuperID, &branch.BranchID, &branch.BranchName,
 			&branch.MgrID, &branch.MgrStartDate); err != nil {
-			log.Println("Error retrieving employees", err)
+			log.Println("Error retrieving employee", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not query database"})
 			return
 		}
@@ -45,7 +45,7 @@ func GETEmployee(c *gin.Context) {
 
 	row := db.QueryRow(database.GetEmployeeByIDQuery, empID)
 
-	var employee server.Employee
+	var employee Employee
 	if err := row.Scan(&employee.EmpID, &employee.FirstName, &employee.LastName, &employee.BirthDate, &employee.Sex, &employee.Salary, &employee.SuperID, &employee.Branch.BranchID); err != nil {
 		log.Println("No Employee Found", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
@@ -54,32 +54,40 @@ func GETEmployee(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, employee)
 }
 
-//	func POSTEmployee(c *gin.Context) {
-//		db := database.RetrieveDatabase()
-//
-//		var employee Employee
-//		if err := c.ShouldBindJSON(&employee); err != nil {
-//			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//			return
-//		}
-//
-//		row, err := db.Exec("INSERT INTO employee VALUES(?, ?, ?, ?, ?, ?, ?, ?)", employee.EmpID,
-//			employee.FirstName, employee.LastName, employee.BirthDate, employee.Sex, employee.Salary, employee.SuperID, employee.Branch.BranchID)
-//		if err != nil {
-//			log.Println("Error inserting a new employee", err)
-//			return
-//		}
-//
-//		empID, err := row.LastInsertId()
-//		if err != nil {
-//			log.Println("Error retrieving new employee ID", err)
-//			return
-//		}
-//
-//		employee.EmpID = empID
-//		c.IndentedJSON(http.StatusCreated, employee)
-//	}
-func validateEmployeeData(employee server.Employee) error {
+func POSTEmployee(c *gin.Context) {
+	db := database.RetrieveDatabase()
+
+	var employee Employee
+	if err := c.ShouldBindJSON(&employee); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := validateEmployeeData(employee); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	row, err := db.Exec(database.PostEmployeeQuery, employee.EmpID,
+		employee.FirstName, employee.LastName, employee.BirthDate, employee.Sex, employee.Salary, employee.SuperID, employee.Branch.BranchID)
+	if err != nil {
+		log.Println("Error inserting a new employee", err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	empID, err := row.LastInsertId()
+	if err != nil {
+		log.Println("Failure to increment new employee ID", err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	employee.EmpID = &empID
+	c.IndentedJSON(http.StatusCreated, employee)
+}
+
+func validateEmployeeData(employee Employee) error {
 	if employee.FirstName == "" {
 		return errors.New("first name is required")
 	}
@@ -88,16 +96,20 @@ func validateEmployeeData(employee server.Employee) error {
 		return errors.New("last name is required")
 	}
 
-	if employee.BirthDate.IsZero() {
-		return errors.New("birth date is required")
+	if employee.BirthDate == "" {
+		return errors.New("birth date must be in the format YYYY-MM-DD")
 	}
 
-	if employee.Salary <= 0 {
-		return errors.New("salary must be greater than zero")
+	if employee.Salary <= 50000 {
+		return errors.New("salary must be greater than 50K")
 	}
 
 	if employee.Branch.BranchID <= 0 {
 		return errors.New("employee's branch must be specified")
+	}
+
+	if employee.SuperID != employee.Branch.MgrID {
+		return errors.New("incorrect supervisor id")
 	}
 
 	return nil

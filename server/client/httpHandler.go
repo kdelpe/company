@@ -1,8 +1,8 @@
-package Clients
+package client
 
 import (
 	"example/company/database"
-	"example/company/server"
+	"example/company/server/branch"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -14,18 +14,18 @@ func GETClients(c *gin.Context) {
 
 	rows, err := db.Query(database.GetAllClientsQuery)
 	if err != nil {
-		log.Println("Error retrieving clients", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not retrieve clients"})
+		log.Println("Error retrieving client", err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not retrieve client"})
 	}
 
-	var clients []server.Client
+	var clients []Client
 	for rows.Next() {
-		var client server.Client
-		var branch server.Branch
+		var client Client
+		var branch branch.Branch
 		if err := rows.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate,
 			&client.ClientID, &client.ClientName); err != nil {
-			log.Println("Error retrieving clients", err)
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not retrieve clients"})
+			log.Println("Error retrieving client", err)
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not retrieve client"})
 		}
 		client.Branch = branch
 		clients = append(clients, client)
@@ -45,8 +45,8 @@ func GETClient(c *gin.Context) {
 
 	row := db.QueryRow(database.GetClientByIDQuery, clientID)
 
-	var client server.Client
-	var branch server.Branch
+	var client Client
+	var branch branch.Branch
 	if err := row.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate,
 		&client.ClientID, &client.ClientName); err != nil {
 		log.Println("Error client", err)
