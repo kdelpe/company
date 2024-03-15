@@ -51,7 +51,7 @@ func GETEmployee(c *gin.Context) {
 		&employee.Sex, &employee.Salary, &employee.SuperID, &br.BranchID, &br.BranchName,
 		&br.MgrID, &br.MgrStartDate); err != nil {
 		log.Println("No Employee Found", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Employee with the specified ID not found"})
 		return
 	}
 	employee.Branch = br
@@ -97,7 +97,7 @@ func POSTEmployee(c *gin.Context) {
 
 func PUTEmployee(c *gin.Context) {
 
-	empID := int64(parseParamID(c))
+	empID := parseParamID(c)
 
 	var updatedEmployee Employee
 	if err := c.ShouldBindJSON(&updatedEmployee); err != nil {
@@ -116,6 +116,22 @@ func PUTEmployee(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Employee updated successfully"})
+}
+
+func DELETEEmployee(c *gin.Context) {
+	db := database.RetrieveDatabase()
+
+	// Parse employee ID from URL parameter
+	empID := parseParamID(c)
+
+	// Execute DELETE query
+	_, err := db.Exec(DeleteEmployeeQuery, empID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete employee"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusNoContent, gin.H{"message": "Employee deleted successfully"})
 }
 
 func validateEmployeeData(employee Employee) error {
@@ -138,8 +154,8 @@ func validateEmployeeData(employee Employee) error {
 	return nil
 }
 
-func parseParamID(c *gin.Context) int {
-	empID, err := strconv.Atoi(c.Param("id")) // Convert string to integer
+func parseParamID(c *gin.Context) int64 {
+	empID, err := strconv.ParseInt(c.Param("id"), 10, 64) // Convert string to integer
 	if err != nil {
 		log.Println("Invalid employee ID:", err)
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": err.Error()})
