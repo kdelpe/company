@@ -23,17 +23,16 @@ func GETEmployees(c *gin.Context) {
 	var employees []Employee
 	for rows.Next() {
 		var employee Employee
-		var branch branch.Branch
+		var br branch.Branch
 		if err := rows.Scan(&employee.EmpID, &employee.FirstName, &employee.LastName, &employee.BirthDate, &employee.Sex,
-			&employee.Salary, &employee.SuperID, &branch.BranchID, &branch.BranchName,
-			&branch.MgrID, &branch.MgrStartDate); err != nil {
+			&employee.Salary, &employee.SuperID, &br.BranchID, &br.BranchName,
+			&br.MgrID, &br.MgrStartDate); err != nil {
 			log.Println("Error retrieving employee", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-		employee.Branch = branch
-
+		employee.Branch = br
+		employee.SuperID = br.MgrID
 		employees = append(employees, employee)
 	}
 	c.IndentedJSON(http.StatusOK, employees)
@@ -52,15 +51,15 @@ func GETEmployee(c *gin.Context) {
 	row := db.QueryRow(GetEmployeeByIDQuery, empID)
 
 	var employee Employee
-	var branch branch.Branch
+	var br branch.Branch
 	if err := row.Scan(&employee.EmpID, &employee.FirstName, &employee.LastName, &employee.BirthDate,
-		&employee.Sex, &employee.Salary, &employee.SuperID, &branch.BranchID, &branch.BranchName,
-		&branch.MgrID, &branch.MgrStartDate); err != nil {
+		&employee.Sex, &employee.Salary, &employee.SuperID, &br.BranchID, &br.BranchName,
+		&br.MgrID, &br.MgrStartDate); err != nil {
 		log.Println("No Employee Found", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	employee.Branch = branch
+	employee.Branch = br
 	c.IndentedJSON(http.StatusOK, employee)
 }
 
@@ -78,16 +77,16 @@ func POSTEmployee(c *gin.Context) {
 		return
 	}
 
-	if employee.SuperID == nil {
-		employee.SuperID = employee.Branch.MgrID
-	}
-
 	row, err := db.Exec(PostEmployeeQuery, employee.EmpID, employee.FirstName, employee.LastName,
 		employee.BirthDate, employee.Sex, employee.Salary, &employee.SuperID, employee.Branch.BranchID)
 	if err != nil {
 		log.Println("Error inserting a new employee", err)
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	if employee.SuperID == nil {
+		employee.SuperID = employee.Branch.MgrID
 	}
 
 	empID, err := row.LastInsertId()
