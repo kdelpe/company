@@ -41,12 +41,7 @@ func GETEmployees(c *gin.Context) {
 func GETEmployee(c *gin.Context) {
 	db := database.RetrieveDatabase()
 
-	empID, err := strconv.Atoi(c.Param("id")) // Convert string to integer
-	if err != nil {
-		log.Println("Invalid employee ID:", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": err.Error()})
-		return
-	}
+	empID := parseParamID(c)
 
 	row := db.QueryRow(GetEmployeeByIDQuery, empID)
 
@@ -100,6 +95,29 @@ func POSTEmployee(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, employee)
 }
 
+func PUTEmployee(c *gin.Context) {
+
+	empID := int64(parseParamID(c))
+
+	var updatedEmployee Employee
+	if err := c.ShouldBindJSON(&updatedEmployee); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := validateEmployeeData(updatedEmployee); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := updateEmployeeInDB(empID, updatedEmployee); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Employee updated successfully"})
+}
+
 func validateEmployeeData(employee Employee) error {
 	if employee.FirstName == "" {
 		return errors.New("first name is required")
@@ -118,4 +136,13 @@ func validateEmployeeData(employee Employee) error {
 	}
 
 	return nil
+}
+
+func parseParamID(c *gin.Context) int {
+	empID, err := strconv.Atoi(c.Param("id")) // Convert string to integer
+	if err != nil {
+		log.Println("Invalid employee ID:", err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": err.Error()})
+	}
+	return empID
 }
