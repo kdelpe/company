@@ -2,10 +2,10 @@ package main
 
 import (
 	"example/company/database"
-	"example/company/server/BranchSuppliers"
-	"example/company/server/Branches"
-	"example/company/server/Clients"
-	"example/company/server/Employees"
+	"example/company/server/branch"
+	"example/company/server/branch-suppliers"
+	"example/company/server/client"
+	"example/company/server/employee"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -16,10 +16,10 @@ func main() {
 	router := gin.Default()
 
 	// Set up routes
-	Branches.Routes(router)
-	Employees.Routes(router)
-	BranchSuppliers.Routes(router)
-	Clients.Routes(router)
+	branch.Routes(router)
+	employee.Routes(router)
+	branch_suppliers.Routes(router)
+	client.Routes(router)
 
 	//Start server
 	if err := router.Run("localhost:9090"); err != nil {

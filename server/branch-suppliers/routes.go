@@ -1,4 +1,4 @@
-package BranchSuppliers
+package branch_suppliers
 
 import "github.com/gin-gonic/gin"
 
