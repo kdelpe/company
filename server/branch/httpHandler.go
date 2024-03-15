@@ -10,9 +10,10 @@ import (
 func GETBranches(c *gin.Context) {
 	db := database.RetrieveDatabase()
 
-	rows, err := db.Query(database.GetAllBranchesQuery)
+	rows, err := db.Query(GetAllBranchesQuery)
 	if err != nil {
 		log.Println("Error retrieving the branch: ", err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -21,6 +22,7 @@ func GETBranches(c *gin.Context) {
 		var branch Branch
 		if err := rows.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate); err != nil {
 			log.Println("Error retrieving branch", err)
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		branches = append(branches, branch)
@@ -33,12 +35,12 @@ func GETBranch(c *gin.Context) {
 
 	branchID := c.Param("id")
 
-	row := db.QueryRow(database.GetBranchByIDQuery, branchID)
+	row := db.QueryRow(GetBranchByIDQuery, branchID)
 
 	var branch Branch
 	if err := row.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate); err != nil {
 		log.Println("Error retrieving branch", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Bad Request: could not retrieve branch"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, branch)

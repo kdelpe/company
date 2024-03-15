@@ -5,6 +5,7 @@ import (
 	"example/company/server/branch"
 	"example/company/server/branch-suppliers"
 	"example/company/server/client"
+	"example/company/server/employee"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -16,7 +17,7 @@ func main() {
 
 	// Set up routes
 	branch.Routes(router)
-	Employees.Routes(router)
+	employee.Routes(router)
 	branch_suppliers.Routes(router)
 	client.Routes(router)
 

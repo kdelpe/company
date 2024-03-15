@@ -12,10 +12,10 @@ import (
 func GETBranchSuppliers(c *gin.Context) {
 	db := database.RetrieveDatabase()
 
-	rows, err := db.Query(database.GetAllBranchSuppliersQuery)
+	rows, err := db.Query(GetAllBranchSuppliersQuery)
 	if err != nil {
 		log.Println("Error retrieving branch suppliers", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": "Bad Request"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": err.Error()})
 		return
 	}
 
@@ -26,7 +26,7 @@ func GETBranchSuppliers(c *gin.Context) {
 		if err := rows.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate,
 			&branchSupplier.SupplierName, &branchSupplier.SupplyType); err != nil {
 			log.Println("Error retrieving branch suppliers", err)
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": "Bad Request"})
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": err.Error()})
 			return
 		}
 		branchSupplier.Branch = branch
@@ -41,18 +41,18 @@ func GETBranchSupplier(c *gin.Context) {
 	branchSupplierID, err := strconv.Atoi(c.Param("id")) // Convert string to integer
 	if err != nil {
 		log.Println("Invalid branch supplier ID:", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": "Bad Request: Invalid branch supplier ID"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": err.Error()})
 		return
 	}
 
-	row := db.QueryRow(database.GetBranchSupplierByIDQuery, branchSupplierID)
+	row := db.QueryRow(GetBranchSupplierByIDQuery, branchSupplierID)
 
 	var branchSupplier BranchSuppliers
 	var branch branch.Branch
 	if err := row.Scan(&branch.BranchID, &branch.BranchName, &branch.MgrID, &branch.MgrStartDate,
 		&branchSupplier.SupplierName, &branchSupplier.SupplyType); err != nil {
 		log.Println("Error retrieving branch supplier", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": "Bad Request: Could not retrieve branch supplier"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error:": err.Error()})
 		return
 	}
 	branchSupplier.Branch = branch
