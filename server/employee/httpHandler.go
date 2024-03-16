@@ -121,10 +121,20 @@ func PUTEmployee(c *gin.Context) {
 func DELETEEmployee(c *gin.Context) {
 	db := database.RetrieveDatabase()
 
-	// Parse employee ID from URL parameter
 	empID := parseParamID(c)
 
-	// Execute DELETE query
+	var employee Employee
+	if err := c.ShouldBindJSON(&employee); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing employee's first and last name to delete"})
+		return
+	}
+
+	// Check if first name and last name are not empty
+	if employee.FirstName == "" || employee.LastName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "First name and last name are mandatory"})
+		return
+	}
+
 	_, err := db.Exec(DeleteEmployeeQuery, empID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete employee"})
