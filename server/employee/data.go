@@ -11,6 +11,6 @@ type Employee struct {
 	BirthDate string        `json:"birth_date"`
 	Sex       string        `json:"sex"`
 	Salary    int64         `json:"salary"`
-	SuperID   *int64        `json:"super_id"`
+	SuperID   int64         `json:"super_id"`
 	Branch    branch.Branch `json:"branch"`
 }

@@ -82,19 +82,7 @@ func updateEmployeeInDB(empID int64, employee Employee) error {
 	db := database.RetrieveDatabase()
 
 	// Prepare the SQL query to update the employee
-	query := `
-		UPDATE employee
-		SET
-			first_name = ?,
-			last_name = ?,
-			birth_date = ?,
-			sex = ?,
-			salary = ?,
-			super_id = ?,
-			branch_id = ?
-		WHERE
-			emp_id = ?
-	`
+	query := PUTEmployeeQuery
 
 	// Execute the update query
 	result, err := db.Exec(query,
@@ -118,7 +106,7 @@ func updateEmployeeInDB(empID int64, employee Employee) error {
 		return err
 	}
 	if rowsAffected == 0 {
-		return errors.New("Update unsuccessful: Employee record not found")
+		return errors.New("update unsuccessful: Employee record not found")
 	}
 
 	return nil

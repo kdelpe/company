@@ -6,7 +6,7 @@ const (
             b.branch_id,
             b.branch_name,
             b.mgr_id,
-            b.mgr_start_date,
+            DATE_FORMAT(b.mgr_start_date, '%Y-%m-%d'),
             bs.supplier_name,
             bs.supply_type
         FROM
@@ -20,7 +20,7 @@ const (
             b.branch_id,
             b.branch_name,
             b.mgr_id,
-            b.mgr_start_date,
+            DATE_FORMAT(b.mgr_start_date, '%Y-%m-%d'),
             bs.supplier_name,
             bs.supply_type
         FROM
