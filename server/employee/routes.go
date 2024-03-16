@@ -7,4 +7,5 @@ func Routes(router *gin.Engine) {
 	router.GET("/api/employee/:id", GETEmployee)
 	router.POST("/api/employee", POSTEmployee)
 	router.PUT("/api/employee/:id", PUTEmployee)
+	router.DELETE("/api/employee/:id", DELETEEmployee)
 }

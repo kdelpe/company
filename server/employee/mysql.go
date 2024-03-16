@@ -57,7 +57,8 @@ const (
 	PostEmployeeQuery = `INSERT INTO employee VALUES (?, ?, ?, ?, ?, ?, ?, ?);`
 
 	PUTEmployeeQuery = `
-			UPDATE employee
+		UPDATE 
+		    employee
 		SET
 			first_name = ?,
 			last_name = ?,
@@ -68,6 +69,12 @@ const (
 			branch_id = ?
 		WHERE
 			emp_id = ?
+`
+	DeleteEmployeeQuery = `
+	DELETE FROM 
+	           employee 
+	       WHERE 
+	           emp_id = ?
 `
 )
 
