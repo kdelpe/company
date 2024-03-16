@@ -5,7 +5,7 @@ import (
 )
 
 type Employee struct {
-	EmpID     *int64        `json:"emp_id"`
+	EmpID     int64         `json:"emp_id"`
 	FirstName string        `json:"first_name"`
 	LastName  string        `json:"last_name"`
 	BirthDate string        `json:"birth_date"`

@@ -32,7 +32,7 @@ func GETEmployees(c *gin.Context) {
 			return
 		}
 		employee.Branch = br
-		employee.SuperID = br.MgrID
+		employee.SuperID = &br.MgrID
 		employees = append(employees, employee)
 	}
 	c.IndentedJSON(http.StatusOK, employees)
@@ -63,7 +63,7 @@ func POSTEmployee(c *gin.Context) {
 
 	var employee Employee
 	if err := c.ShouldBindJSON(&employee); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -81,7 +81,7 @@ func POSTEmployee(c *gin.Context) {
 	}
 
 	if employee.SuperID == nil {
-		employee.SuperID = employee.Branch.MgrID
+		employee.SuperID = &employee.Branch.MgrID
 	}
 
 	empID, err := row.LastInsertId()
@@ -91,7 +91,7 @@ func POSTEmployee(c *gin.Context) {
 		return
 	}
 
-	employee.EmpID = &empID
+	employee.EmpID = empID
 	c.IndentedJSON(http.StatusCreated, employee)
 }
 
@@ -129,7 +129,6 @@ func DELETEEmployee(c *gin.Context) {
 		return
 	}
 
-	// Check if first name and last name are not empty
 	if employee.FirstName == "" || employee.LastName == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "First name and last name are mandatory"})
 		return
