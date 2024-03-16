@@ -94,8 +94,8 @@ func PUTBranch(c *gin.Context) {
 		return
 	}
 
-	if err := validateBranch(branch); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if branch.BranchName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "branch_name is mandatory"})
 		return
 	}
 
@@ -105,7 +105,7 @@ func PUTBranch(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update branch"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Branch updated successfully"})
+	c.JSON(http.StatusAccepted, gin.H{"message": "Branch updated successfully"})
 }
 
 func DELETEBranch(c *gin.Context) {
@@ -119,22 +119,17 @@ func DELETEBranch(c *gin.Context) {
 		return
 	}
 
-	if err := validateBranch(branch); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	if branch.BranchName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "branch_name is mandatory"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "branch_name is missing"})
 		return
 	}
 
 	_, err := db.Exec(DELETEBranchQuery, branchID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete employee"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete branch"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "Employee deleted successfully"})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Branch deleted successfully"})
 
 }
 

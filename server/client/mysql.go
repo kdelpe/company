@@ -6,12 +6,15 @@ const (
             b.branch_id,
             b.branch_name,
             b.mgr_id,
-            b.mgr_start_date,
+            DATE_FORMAT(b.mgr_start_date, '%Y-%m-%d'),
             c.client_id,
             c.client_name
         FROM 
             branch b
-        LEFT JOIN client c on b.branch_id = c.branch_id;
+        LEFT JOIN 
+                client c on b.branch_id = c.branch_id
+        ORDER BY 
+            client_id;
     `
 
 	GetClientByIDQuery = `
@@ -19,7 +22,7 @@ const (
             b.branch_id,
             b.branch_name,
             b.mgr_id,
-            b.mgr_start_date,
+            DATE_FORMAT(b.mgr_start_date, '%Y-%m-%d'),
             c.client_id,
             c.client_name
         FROM
@@ -29,4 +32,26 @@ const (
         WHERE
             c.client_id = ?;
     `
+
+	PostClientQuery = `
+	        INSERT INTO
+				client (client_name, branch_id)
+	        VALUES (?, ?);
+`
+
+	PUTClientQuery = `
+	UPDATE 
+	    client 
+	SET 
+	    client_name = ?, client.branch_id = ?
+	WHERE 
+	    client_id = ?;
+`
+
+	DELETEClientQuery = `
+	DELETE FROM 
+	           client 
+	WHERE 
+	    client_id = ?;
+`
 )
