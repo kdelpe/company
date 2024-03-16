@@ -32,7 +32,7 @@ func GETEmployees(c *gin.Context) {
 			return
 		}
 		employee.Branch = br
-		employee.SuperID = &br.MgrID
+		employee.SuperID = br.MgrID
 		employees = append(employees, employee)
 	}
 	c.IndentedJSON(http.StatusOK, employees)
@@ -80,8 +80,8 @@ func POSTEmployee(c *gin.Context) {
 		return
 	}
 
-	if employee.SuperID == nil {
-		employee.SuperID = &employee.Branch.MgrID
+	if employee.SuperID == 0 {
+		employee.SuperID = employee.Branch.MgrID
 	}
 
 	empID, err := row.LastInsertId()

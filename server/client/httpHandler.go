@@ -86,7 +86,7 @@ func POSTClient(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	newClient.ClientID = &clientID
+	newClient.ClientID = clientID
 
 	c.IndentedJSON(http.StatusCreated, newClient)
 }
@@ -108,7 +108,7 @@ func PUTClient(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update client record"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "Client record updated succesfully"})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Client record updated successfully"})
 }
 
 func DELETEClient(c *gin.Context) {
@@ -122,7 +122,7 @@ func DELETEClient(c *gin.Context) {
 		return
 	}
 
-	if deletedClient.ClientName == nil {
+	if deletedClient.ClientName == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "client_name is missing"})
 		return
 	}
@@ -136,7 +136,7 @@ func DELETEClient(c *gin.Context) {
 }
 
 func validateClient(client Client) error {
-	if client.ClientName == nil {
+	if client.ClientName == "" {
 		return errors.New("client name field is missing")
 	}
 	return nil
